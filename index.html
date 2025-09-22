@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>For You — a small website for my love</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#ff6b81; --muted:#94a3b8;
+      --glass: rgba(255,255,255,0.05);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#061021);color:#e6eef8}
+    .container{max-width:980px;margin:36px auto;padding:20px}
+
+    header{display:flex;gap:16px;align-items:center}
+    .logo{width:72px;height:72px;border-radius:14px;background:linear-gradient(135deg,#ff9aa2,#ffd6a5);display:flex;align-items:center;justify-content:center;font-weight:700;color:#0b1220;font-size:20px;box-shadow:0 6px 30px rgba(0,0,0,0.6)}
+    h1{margin:0;font-size:clamp(20px,4vw,34px)}
+    p.lead{color:var(--muted);margin:4px 0 0}
+
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:18px;margin-top:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);backdrop-filter: blur(6px)}
+
+    .hero{display:grid;grid-template-columns:160px 1fr;gap:18px;align-items:center}
+    .photo{width:160px;height:160px;border-radius:16px;overflow:hidden;background:linear-gradient(135deg,#4f46e5,#06b6d4);display:flex;align-items:center;justify-content:center;position:relative}
+    .photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .photo input{position:absolute;inset:0;opacity:0;cursor:pointer}
+
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:linear-gradient(90deg,var(--accent),#ff9a7a);color:#021025;text-decoration:none;font-weight:600;border:none;cursor:pointer}
+    .btn.outline{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px;margin-top:18px}
+    .left{min-height:220px}
+
+    .message-box{font-size:16px;line-height:1.5;color:#e6eef8}
+    .typing{font-weight:700;color:var(--accent)}
+
+    .controls{display:flex;gap:12px;align-items:center;margin-top:12px}
+
+    footer{margin-top:18px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;align-items:center}
+
+    /* little hearts animation */
+    .hearts{position:fixed;right:18px;bottom:18px;pointer-events:none}
+    .heart{width:18px;height:18px;position:relative;transform:scale(0);opacity:0}
+    .heart::before,.heart::after{content:'';width:18px;height:18px;background:var(--accent);position:absolute;border-radius:50%}
+    .heart::before{left:9px}
+    .heart::after{top:9px}
+
+    @keyframes popUp{0%{transform:translateY(0) scale(0);opacity:0}10%{transform:translateY(-6px) scale(1.02);opacity:1}100%{transform:translateY(-220px) scale(.6);opacity:0}}
+
+    .confetti-canvas{position:fixed;inset:0;pointer-events:none}
+
+    /* responsive */
+    @media (max-width:820px){.grid{grid-template-columns:1fr}.hero{grid-template-columns:120px 1fr}.photo{width:120px;height:120px}}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">❤️Y</div>
+      <div>
+        <h1>For You — a small page I made</h1>
+        <p class="lead">A little corner on the web to tell her she matters.</p>
+      </div>
+    </header>
+
+    <div class="card">
+      <div class="hero">
+        <label class="photo" title="Click to upload/change photo">
+          <img id="photoPreview" src="https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=800&q=60" alt="Her photo" />
+          <input id="photoInput" type="file" accept="image/*">
+        </label>
+
+        <div>
+          <div style="display:flex;justify-content:space-between;align-items:start;gap:12px;flex-wrap:wrap">
+            <div>
+              <h2 id="herName">My Love</h2>
+              <p style="margin:6px 0 0;color:var(--muted)">Open this page whenever you want to see a smile ✨</p>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn" id="playBtn">Play song</button>
+              <button class="btn outline" id="surpriseBtn">Surprise</button>
+            </div>
+          </div>
+
+          <div class="controls">
+            <label style="color:var(--muted)">Message:</label>
+            <input id="customMsg" type="text" placeholder="Write something sweet..." style="flex:1;padding:10px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:inherit">
+            <button class="btn outline" id="sendMsg">Show</button>
+          </div>
+
+          <div style="margin-top:14px" class="message-box">
+            <div>Hey <span class="typing" id="typingName">there</span> —</div>
+            <div id="typed" style="margin-top:8px;color:var(--muted)">I made this little page for you. I hope it makes you smile.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="left">
+          <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn" id="toggleGallery">Toggle Gallery</button>
+            <a class="btn outline" href="#" id="downloadBtn">Download</a>
+          </div>
+
+          <div id="gallery" style="margin-top:16px;display:none;gap:8px;flex-wrap:wrap">
+            <!-- small gallery -->
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=60" style="width:120px;height:90px;object-fit:cover;border-radius:8px;margin-right:8px;margin-bottom:8px">
+            <img src="https://images.unsplash.com/photo-1524503033411-c9566986fc8f?auto=format&fit=crop&w=600&q=60" style="width:120px;height:90px;object-fit:cover;border-radius:8px;margin-right:8px;margin-bottom:8px">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=600&q=60" style="width:120px;height:90px;object-fit:cover;border-radius:8px;margin-right:8px;margin-bottom:8px">
+          </div>
+
+          <div style="margin-top:18px;color:var(--muted);font-size:14px">
+            <strong>Notes:</strong>
+            <ul>
+              <li>Click the photo to upload/change the picture that will be shown here.</li>
+              <li>Use the message box to show a custom message.</li>
+              <li>Surprise shows an animation with confetti and little hearts.</li>
+            </ul>
+          </div>
+        </div>
+
+        <aside class="card" style="padding:12px">
+          <h3 style="margin:6px 0">Quick love meter</h3>
+          <div id="meter" style="height:160px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:var(--accent)">0%</div>
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button class="btn" id="boostBtn">Boost ❤️</button>
+            <button class="btn outline" id="resetBtn">Reset</button>
+          </div>
+        </aside>
+      </div>
+
+      <footer>
+        <div>Made with ❤️</div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="btn outline" id="editName">Edit name</button>
+          <a class="btn" id="openLink" href="#">Open in new tab</a>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <canvas id="confettiCanvas" class="confetti-canvas"></canvas>
+  <div class="hearts" id="hearts"></div>
+
+  <audio id="bgAudio" loop src=""></audio>
+
+  <script>
+    // Simple interactivity — no external libs
+    const photoInput = document.getElementById('photoInput');
+    const photoPreview = document.getElementById('photoPreview');
+    const playBtn = document.getElementById('playBtn');
+    const bgAudio = document.getElementById('bgAudio');
+    const surpriseBtn = document.getElementById('surpriseBtn');
+    const hearts = document.getElementById('hearts');
+    const confettiCanvas = document.getElementById('confettiCanvas');
+    const sendMsg = document.getElementById('sendMsg');
+    const customMsg = document.getElementById('customMsg');
+    const typed = document.getElementById('typed');
+    const typingName = document.getElementById('typingName');
+    const herName = document.getElementById('herName');
+    const editName = document.getElementById('editName');
+    const toggleGallery = document.getElementById('toggleGallery');
+    const gallery = document.getElementById('gallery');
+    const boostBtn = document.getElementById('boostBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const meter = document.getElementById('meter');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const openLink = document.getElementById('openLink');
+
+    // default audio: we leave blank — user can drop URL
+    bgAudio.src = '';
+
+    photoInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if(!file) return;
+      const url = URL.createObjectURL(file);
+      photoPreview.src = url;
+    });
+
+    playBtn.addEventListener('click', ()=>{
+      if(!bgAudio.src){
+        const url = prompt('Paste a URL to an mp3 or audio file to play (or leave blank to cancel):');
+        if(!url) return;
+        bgAudio.src = url;
+      }
+      if(bgAudio.paused) { bgAudio.play(); playBtn.textContent='Pause song' }
+      else { bgAudio.pause(); playBtn.textContent='Play song' }
+    });
+
+    sendMsg.addEventListener('click', ()=>{
+      const msg = customMsg.value.trim();
+      if(!msg) return;
+      typed.textContent = msg;
+      customMsg.value = '';
+      burstHearts(6);
+    });
+
+    surpriseBtn.addEventListener('click', ()=>{
+      burstHearts(12);
+      runConfetti();
+    });
+
+    // simple hearts
+    function burstHearts(n){
+      for(let i=0;i<n;i++){
+        const el = document.createElement('div');
+        el.className='heart';
+        hearts.appendChild(el);
+        // randomize
+        const left = Math.random()*60 + '%';
+        el.style.left = left;
+        el.style.bottom = '0px';
+        el.style.transform = 'scale(1)';
+        el.style.opacity = '1';
+        el.style.animation = 'popUp 2000ms cubic-bezier(.2,.8,.2,1) forwards';
+        setTimeout(()=> el.remove(),2200);
+      }
+    }
+
+    // confetti (very lightweight)
+    function runConfetti(){
+      const ctx = confettiCanvas.getContext('2d');
+      const dpr = window.devicePixelRatio || 1;
+      confettiCanvas.width = innerWidth * dpr; confettiCanvas.height = innerHeight * dpr;
+      confettiCanvas.style.width = innerWidth + 'px'; confettiCanvas.style.height = innerHeight + 'px';
+      ctx.scale(dpr,dpr);
+
+      const pieces = Array.from({length:120}).map(()=>({
+        x: Math.random()*innerWidth, y: Math.random()*-innerHeight, w:6+Math.random()*8, h:6+Math.random()*8, r:Math.random()*360,
+        vx: -1+Math.random()*2, vy: 2+Math.random()*4, color: ['#ff6b81','#ffd166','#9ad3bc','#a3bffa'][Math.floor(Math.random()*4)]
+      }));
+
+      let t=0; function frame(){
+        t++; ctx.clearRect(0,0,innerWidth,innerHeight);
+        for(const p of pieces){
+          p.x += p.vx; p.y += p.vy; p.vy += 0.02; p.r += 4;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r*Math.PI/180);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h); ctx.restore();
+        }
+        if(t<140) requestAnimationFrame(frame); else ctx.clearRect(0,0,innerWidth,innerHeight);
+      }
+      requestAnimationFrame(frame);
+    }
+
+    // small interactive 'love meter'
+    let love = 0;
+    function renderMeter(){ meter.textContent = Math.min(100,Math.round(love)) + '%'; }
+    boostBtn.addEventListener('click', ()=>{ love = Math.min(100, love + (5 + Math.random()*20)); renderMeter(); burstHearts(6); });
+    resetBtn.addEventListener('click', ()=>{ love = 0; renderMeter(); });
+
+    // edit name
+    editName.addEventListener('click', ()=>{
+      const name = prompt('Enter her name:', herName.textContent);
+      if(name!==null) { herName.textContent = name; typingName.textContent = name; }
+    });
+
+    // toggle gallery
+    toggleGallery.addEventListener('click', ()=>{ gallery.style.display = gallery.style.display === 'flex' ? 'none' : 'flex'; });
+
+    // download — quick trick: download page as html file
+    downloadBtn.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href=url; a.download = (herName.textContent||'for-you') + '.html'; a.click(); URL.revokeObjectURL(url);
+    });
+
+    // open in new tab
+    openLink.addEventListener('click', (e)=>{
+      e.preventDefault();
+      const html = '<!doctype html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    });
+
+    // small typing intro when loaded
+    window.addEventListener('load', ()=>{
+      const original = typed.textContent;
+      typed.textContent = '';
+      const text = original;
+      let i=0; function step(){ if(i<=text.length){ typed.textContent = text.slice(0,i); i++; setTimeout(step, 24 + Math.random()*40); } }
+      step();
+      renderMeter();
+    });
+
+    // accessibility: allow keyboard surprise (S key)
+    window.addEventListener('keydown', e=>{ if(e.key.toLowerCase()==='s') { surpriseBtn.click(); } });
+
+  </script>
+</body>
+</html>
